@@ -15,6 +15,11 @@ public class UserViewController {
         return "oauthLogin";
     }
 
+    @GetMapping("/")
+    public String main(){
+        return "oauthLogin";
+    }
+
     @GetMapping("/signup")
     public String signup(){
         return "signup";
