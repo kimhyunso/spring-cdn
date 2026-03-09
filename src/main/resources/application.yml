@@ -1,0 +1,38 @@
+server:
+  port: 8081
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${clientID}
+            client-secret: ${clientSecret}
+            scope:
+              - email
+              - profile
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    defer-datasource-initialization: true
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+  h2:
+    console:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+jwt:
+  issuer: gustn9515@naver.com
+  secret_key: ${secretKey}
+
+
+
