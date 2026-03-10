@@ -57,7 +57,7 @@ public class WebOAuthSecurityConfig {
                         UsernamePasswordAuthenticationFilter.class)
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/signup", "/api/token", "/oauth2/**").permitAll()
+                        .requestMatchers("/login", "/signup", "/api/token", "/oauth2/**", "/user").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
                 )
