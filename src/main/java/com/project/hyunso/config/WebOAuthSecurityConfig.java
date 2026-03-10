@@ -40,38 +40,70 @@ public class WebOAuthSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain oauthSecurityFilterChain(HttpSecurity http) throws Exception{
-        http.csrf().disable()
-                .httpBasic().disable()
-                .formLogin().disable()
-                .logout().disable();
-        http.sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http
+                .csrf().disable()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/login", "/signup", "/user").permitAll()
+                        .anyRequest().authenticated()
+                )
 
-        http.authorizeHttpRequests()
-                .requestMatchers("/api/token").permitAll()
-                .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll();
+                // form login
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/articles")
+                )
 
-        http.oauth2Login()
-                .loginPage("/login")
-                .authorizationEndpoint()
-                .authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository())
-                .and()
-                .successHandler(oAuth2SuccessHandler())
-                .userInfoEndpoint()
-                .userService(oAuth2UserCustomService);
+                // oauth login
+                .oauth2Login(oauth -> oauth
+                        .loginPage("/login")
+                        .userInfoEndpoint(user -> user
+                                .userService(oAuth2UserCustomService)
+                        )
+                        .successHandler(oAuth2SuccessHandler())
+                )
 
-        http.logout()
-                .logoutSuccessUrl("/login");
-
-        http.exceptionHandling()
-                .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/**"));
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/login")
+                );
 
         return http.build();
     }
+
+//    @Bean
+//    public SecurityFilterChain oauthSecurityFilterChain(HttpSecurity http) throws Exception{
+//        http.csrf().disable()
+//                .httpBasic().disable()
+//                .formLogin().disable()
+//                .logout().disable();
+//        http.sessionManagement()
+//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//
+//        http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+//
+//        http.authorizeHttpRequests()
+//                .requestMatchers("/api/token").permitAll()
+//                .requestMatchers("/api/**").authenticated()
+//                .anyRequest().permitAll();
+//
+//        http.oauth2Login()
+//                .loginPage("/login")
+//                .authorizationEndpoint()
+//                .authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository())
+//                .and()
+//                .successHandler(oAuth2SuccessHandler())
+//                .userInfoEndpoint()
+//                .userService(oAuth2UserCustomService);
+//
+//        http.logout()
+//                .logoutSuccessUrl("/login");
+//
+//        http.exceptionHandling()
+//                .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/**"));
+//
+//        return http.build();
+//    }
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler(){
         return new OAuth2SuccessHandler(tokenProvider, refreshTokenRepository,
