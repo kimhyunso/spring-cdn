@@ -38,11 +38,11 @@ public class WebSecurityConfig {
                 .anyRequest().authenticated()
                 .and()
                 .formLogin() // 폼 기반 로그인 설정
-                .loginPage("/")
+                .loginPage("/login")
                 .defaultSuccessUrl("/articles")
                 .and()
                 .logout() // 로그아웃 설정
-                .logoutSuccessUrl("/")
+                .logoutSuccessUrl("/login")
                 .invalidateHttpSession(true)
                 .and()
                 .csrf().disable() // csrf 비활성화
