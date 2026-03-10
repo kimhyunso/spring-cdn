@@ -7,6 +7,9 @@ import com.project.hyunso.dto.UpdateArticleRequest;
 import com.project.hyunso.service.BlogService;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -29,11 +32,13 @@ public class BlogApiController {
     }
 
     @GetMapping("/api/articles")
-    public ResponseEntity<List<ArticleResponse>> findAllArticles(){
-        List<ArticleResponse> articles = blogService.findAll()
-                .stream()
-                .map(ArticleResponse::new)
-                .toList();
+    public ResponseEntity<Page<ArticleResponse>> findAllArticles(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size){
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<ArticleResponse> articles = blogService.findAll(pageable)
+                .map(ArticleResponse::new);
 
         return ResponseEntity.ok()
                 .body(articles);

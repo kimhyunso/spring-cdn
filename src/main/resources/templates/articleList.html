@@ -24,6 +24,38 @@
             </div>
         </div>
     </div>
+
+    <nav>
+        <ul class="pagination justify-content-center">
+
+            <li class="page-item" th:classappend="${articlePage.first}? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/articles(page=${articlePage.number - 1})}">
+                    Previous
+                </a>
+            </li>
+
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, articlePage.totalPages - 1)}"
+                th:classappend="${i == articlePage.number}? 'active'">
+
+                <a class="page-link"
+                   th:href="@{/articles(page=${i})}"
+                   th:text="${i + 1}">
+                </a>
+
+            </li>
+
+            <li class="page-item" th:classappend="${articlePage.last}? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/articles(page=${articlePage.number + 1})}">
+                    Next
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+
     <button type="button" class="btn btn-secondary" onclick="location.href='/logout'">로그아웃</button>
 </div>
 
