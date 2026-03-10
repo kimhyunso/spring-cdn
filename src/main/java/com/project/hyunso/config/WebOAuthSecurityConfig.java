@@ -29,7 +29,7 @@ public class WebOAuthSecurityConfig {
     private final UserService userService;
 
     @Bean
-    public BCryptPasswordEncoder OAuthbCryptPasswordEncoder(){
+    public BCryptPasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
     @Bean
@@ -44,72 +44,45 @@ public class WebOAuthSecurityConfig {
 
         http
                 .csrf().disable()
+                .httpBasic().disable()
+                .formLogin().disable()
+
+                // JWT 서버는 Stateless
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
+                // JWT 필터
+                .addFilterBefore(tokenAuthenticationFilter(),
+                        UsernamePasswordAuthenticationFilter.class)
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/signup", "/user").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/login", "/signup", "/api/token", "/oauth2/**").permitAll()
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll()
                 )
 
-                // form login
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/articles")
-                )
-
-                // oauth login
+                // OAuth 로그인
                 .oauth2Login(oauth -> oauth
                         .loginPage("/login")
-                        .userInfoEndpoint(user -> user
-                                .userService(oAuth2UserCustomService)
+                        .authorizationEndpoint(endpoint ->
+                                endpoint.authorizationRequestRepository(
+                                        oAuth2AuthorizationRequestBasedOnCookieRepository()
+                                )
+                        )
+                        .userInfoEndpoint(user ->
+                                user.userService(oAuth2UserCustomService)
                         )
                         .successHandler(oAuth2SuccessHandler())
-                )
-
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/login")
                 );
 
         return http.build();
     }
-
-//    @Bean
-//    public SecurityFilterChain oauthSecurityFilterChain(HttpSecurity http) throws Exception{
-//        http.csrf().disable()
-//                .httpBasic().disable()
-//                .formLogin().disable()
-//                .logout().disable();
-//        http.sessionManagement()
-//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//
-//        http.addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-//
-//        http.authorizeHttpRequests()
-//                .requestMatchers("/api/token").permitAll()
-//                .requestMatchers("/api/**").authenticated()
-//                .anyRequest().permitAll();
-//
-//        http.oauth2Login()
-//                .loginPage("/login")
-//                .authorizationEndpoint()
-//                .authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository())
-//                .and()
-//                .successHandler(oAuth2SuccessHandler())
-//                .userInfoEndpoint()
-//                .userService(oAuth2UserCustomService);
-//
-//        http.logout()
-//                .logoutSuccessUrl("/login");
-//
-//        http.exceptionHandling()
-//                .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), new AntPathRequestMatcher("/api/**"));
-//
-//        return http.build();
-//    }
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler(){
         return new OAuth2SuccessHandler(tokenProvider, refreshTokenRepository,
                 oAuth2AuthorizationRequestBasedOnCookieRepository(), userService);
     }
-
 
     @Bean
     public OAuth2AuthorizationRequestBasedOnCookieRepository oAuth2AuthorizationRequestBasedOnCookieRepository(){
