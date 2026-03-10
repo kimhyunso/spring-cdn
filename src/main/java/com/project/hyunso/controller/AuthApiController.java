@@ -30,6 +30,11 @@ public class AuthApiController {
 
         User user = userService.findByEmail(request.getEmail());
 
+        if (user == null) {
+            System.out.println("===========user is null===========");
+        }
+
+
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             throw new RuntimeException("Invalid password");
         }
