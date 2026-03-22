@@ -7,7 +7,7 @@ spring:
       client:
         registration:
           google:
-            client-id: ${clientID}
+            client-id: ${clientId}
             client-secret: ${clientSecret}
             scope:
               - email

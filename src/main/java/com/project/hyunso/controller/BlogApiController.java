@@ -34,7 +34,7 @@ public class BlogApiController {
     @GetMapping("/api/articles")
     public ResponseEntity<Page<ArticleResponse>> findAllArticles(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size){
+            @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
 
         Page<ArticleResponse> articles = blogService.findAll(pageable)

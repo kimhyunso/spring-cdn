@@ -41,38 +41,20 @@ public class WebOAuthSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http
                 .csrf().disable()
-                .httpBasic().disable()
-                .formLogin().disable()
-
-                // JWT 서버는 Stateless
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
-                // JWT 필터
-                .addFilterBefore(tokenAuthenticationFilter(),
-                        UsernamePasswordAuthenticationFilter.class)
-
+                .addFilterBefore(tokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/signup", "/api/token", "/oauth2/**", "/user").permitAll()
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/login", "/signup", "/oauth2/**").permitAll()
+                        .requestMatchers("/api/**", "/articles").authenticated()
                         .anyRequest().permitAll()
                 )
-
-                // OAuth 로그인
                 .oauth2Login(oauth -> oauth
                         .loginPage("/login")
-                        .authorizationEndpoint(endpoint ->
-                                endpoint.authorizationRequestRepository(
-                                        oAuth2AuthorizationRequestBasedOnCookieRepository()
-                                )
-                        )
-                        .userInfoEndpoint(user ->
-                                user.userService(oAuth2UserCustomService)
-                        )
+                        .userInfoEndpoint(user -> user.userService(oAuth2UserCustomService))
                         .successHandler(oAuth2SuccessHandler())
                 );
 
